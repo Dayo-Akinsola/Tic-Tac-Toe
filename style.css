@@ -1,3 +1,7 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 .board-container{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -15,6 +19,9 @@
     border-style: solid;
     border-top: none;
     border-left: none;
+    font-size: 50px;
+    text-align: center;
+    padding-top: 20%;
 }
 
 .game-square.right{
@@ -23,4 +30,8 @@
 
 .game-square.bottom{
     border-bottom: none;
+}
+
+.nought{
+    font: 40px;
 }
