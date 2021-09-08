@@ -1,12 +1,11 @@
 const gameBoard = (function() {
-    const board = ['X', 'O', 'X', 'O'];
+    const board = ['&#10539;', '&#79;', '&#10539;', '&#79;', '&#10539;', '&#79;', '&#10539;', '&#10539;', '&#79;'];
 
     const render = () => {
         const gameSquares = document.querySelectorAll('.game-square');
-        for (let i in board.length){
-            console.log('hello');
-            gameSquares[i].textContent = board[i];
-            console.log(gameSquares[i]);
+        for (let i = 0; i < board.length; i++){
+            board[i] === '&#10539;' ? gameSquares[i].classList.add = 'cross' : gameSquares[i].classList.add = 'nought'; 
+            gameSquares[i].innerHTML = board[i];
         }
     }
 
