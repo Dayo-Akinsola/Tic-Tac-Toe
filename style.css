@@ -24,6 +24,10 @@ body{
     padding-top: 20%;
 }
 
+.game-square:hover{
+    cursor: pointer;
+}
+
 .game-square.right{
     border-right: none;
 }
@@ -33,5 +37,9 @@ body{
 }
 
 .nought{
-    font: 40px;
+    font-size: 40px;
+}
+
+.cross{
+    font-size: 40px;
 }
