@@ -1,8 +1,11 @@
+// X code: &#10539;
+// O code: &#79;
+
 const gameBoard = (function() {
-    const board = ['&#10539;', '&#79;', '&#10539;', '&#79;', '&#10539;', '&#79;', '&#10539;', '&#10539;', '&#79;'];
+    const board = [];
+    const gameSquares = document.querySelectorAll('.game-square');
 
     const render = () => {
-        const gameSquares = document.querySelectorAll('.game-square');
         for (let i = 0; i < board.length; i++){
             board[i] === '&#10539;' ? gameSquares[i].classList.add = 'cross' : gameSquares[i].classList.add = 'nought'; 
             gameSquares[i].innerHTML = board[i];
@@ -11,14 +14,21 @@ const gameBoard = (function() {
 
     return {
         render,
+        board,
+        gameSquares,
     };
 })();
 
 const player = (name) => {
-    const playerName = name;
+    const _playerName = name;
 
+    const playerMove = () => {
+        gameBoard.board.push('X');
+        console.log(gameBoard.board);
+    }
+    
     return{
-        playerName,
+        playerMove,
     }
 }
 
@@ -30,4 +40,7 @@ const displayController = (() => {
     }
 })();
 
+
+const player1 = player('Player 1');
+player1.playerMove();
 gameBoard.render();
