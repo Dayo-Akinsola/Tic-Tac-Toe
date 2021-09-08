@@ -5,11 +5,8 @@ const gameBoard = (function() {
     const board = [];
     const gameSquares = document.querySelectorAll('.game-square');
 
-    const render = () => {
-        for (let i = 0; i < board.length; i++){
-            board[i] === '&#10539;' ? gameSquares[i].classList.add = 'cross' : gameSquares[i].classList.add = 'nought'; 
-            gameSquares[i].innerHTML = board[i];
-        }
+    const render = (square) => {
+            square.innerHTML = board[board.length - 1];
     }
 
     return {
@@ -19,12 +16,34 @@ const gameBoard = (function() {
     };
 })();
 
-const player = (name) => {
+const Player = (name) => {
     const _playerName = name;
 
-    const playerMove = () => {
-        gameBoard.board.push('X');
-        console.log(gameBoard.board);
+    let round = 1;
+
+    const _roundCount = () => round++;
+
+    const _playRound = (square) => {
+        switch(round % 2 === 1){
+            case true:
+                gameBoard.board.push('&#10539;');
+                gameBoard.render(square);
+                break;
+            case false:
+                gameBoard.board.push('&#79;');
+                gameBoard.render(square);
+            }
+        
+    }
+
+    const playerMove = (mark) => {
+        gameBoard.gameSquares.forEach(square => {
+            square.addEventListener('click', () => {
+                square.classList.add(mark);
+                _playRound(square);
+                _roundCount();
+            })
+        })
     }
     
     return{
@@ -32,15 +51,25 @@ const player = (name) => {
     }
 }
 
+const player1 = Player('Player 1');
+const player2 = Player('Player 2');
+
 const displayController = (() => {
-    const gameFlow = null;
+
+    const simulateGame = () => {
+        
+    }
 
     return {
-        gameFlow,
+        simulateGame,
     }
 })();
 
+player1.playerMove('cross');
+player2.playerMove('nought');
 
-const player1 = player('Player 1');
-player1.playerMove();
-gameBoard.render();
+
+
+
+
+
