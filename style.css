@@ -41,5 +41,6 @@ body{
 }
 
 .cross{
+    position: sticky;
     font-size: 40px;
 }
