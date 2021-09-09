@@ -6,17 +6,33 @@
     </head>
     <script type="module" src="ticTacToe.js" defer></script>
     <body>
-        <div class="board-container">
-            <div class="game-square top left" id="top-left"></div>
-            <div class="game-square top center" id="top-center"></div>
-            <div class="game-square top right" id="top-right"></div>
-            <div class="game-square middle left" id="middle-left"></div>
-            <div class="game-square middle center" id="middle-center"></div>
-            <div class="game-square middle right" id="middle-right"></div>
-            <div class="game-square bottom left" id="bottom-left"></div>
-            <div class="game-square bottom center" id="bottom-center"></div>
-            <div class="game-square bottom right" id="bottom-right"></div>
+        <div class="game-container">
+            <div class="player-area">
+                <h3>Player 1</h3>
+                <div class="XO-buttons">
+                    <button class="XO-button">&#10539</button>
+                    <button class="XO-button">&#79</button>
+                </div>
+            </div>
+            <div class="board-container">
+                <div class="game-square top left" id="top-left"></div>
+                <div class="game-square top center" id="top-center"></div>
+                <div class="game-square top right" id="top-right"></div>
+                <div class="game-square middle left" id="middle-left"></div>
+                <div class="game-square middle center" id="middle-center"></div>
+                <div class="game-square middle right" id="middle-right"></div>
+                <div class="game-square bottom left" id="bottom-left"></div>
+                <div class="game-square bottom center" id="bottom-center"></div>
+                <div class="game-square bottom right" id="bottom-right"></div>
+            </div>
+            <div class="ai-area">
+                <h3>Player 2</h3>
+                <div class="XO-buttons">
+                    <button class="XO-button">&#10539</button>
+                    <button class="XO-button">&#79</button>
+                </div>
+            </div>
         </div>
-        <div class="winner"></div>
+        <div class="result"></div>
     </body>
 </html>
