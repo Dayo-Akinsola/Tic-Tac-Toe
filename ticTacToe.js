@@ -10,7 +10,7 @@ const gameBoard = (function() {
     }
 
     // These functions check if there are three noughts or crosses in a row.
-    const vertWinnerCheck = (mark) => {
+    const _vertWinnerCheck = (mark) => {
         for (let i = 0; i < 3; i ++){
             if (Array.from(gameSquares[i].classList).includes(mark) 
             && Array.from(gameSquares[i + 3].classList).includes(mark) 
@@ -20,7 +20,7 @@ const gameBoard = (function() {
         }
     }
 
-    const horWinnerCheck = (mark) => {
+    const _horWinnerCheck = (mark) => {
         for (let i = 0; i < 9; i += 3){
             if(Array.from(gameSquares[i].classList).includes(mark) 
             && Array.from(gameSquares[i + 1].classList).includes(mark) 
@@ -30,7 +30,7 @@ const gameBoard = (function() {
         }
     }
 
-    const diagWinnerCheck = (mark) => {
+    const _diagWinnerCheck = (mark) => {
         if (Array.from(gameSquares[0].classList).includes(mark) 
         && Array.from(gameSquares[4].classList).includes(mark) 
         && Array.from(gameSquares[8].classList).includes(mark)){
@@ -39,18 +39,24 @@ const gameBoard = (function() {
 
         else if (Array.from(gameSquares[2].classList).includes(mark) 
         && Array.from(gameSquares[4].classList).includes(mark) 
-        && Array.from(gameSquares[6].classList).inlcudes(mark)){
+        && Array.from(gameSquares[6].classList).includes(mark)){
             return mark;
         } 
+    }
+
+    const winnerCheck = (mark) => {
+        if (_vertWinnerCheck(mark) === mark 
+        || _horWinnerCheck(mark) === mark 
+        || _diagWinnerCheck(mark) === mark){
+            return mark;
+        }
     }
 
     return {
         render,
         board,
         gameSquares,
-        vertWinnerCheck,
-        horWinnerCheck,
-        diagWinnerCheck,
+        winnerCheck,
     };
 })();
 
@@ -86,12 +92,13 @@ const Player = (mark) => {
                 if (!Array.from(square.classList).includes('cross') && !Array.from(square.classList).includes('nought') && round <=9){
                     _playRound(square, opponent);
                     _roundCount();
-                    console.log(gameBoard.gameSquares);
-                    console.log(gameBoard.diagWinnerCheck('cross'));
-                    console.log(gameBoard.diagWinnerCheck('nought'));
+
+                    if (gameBoard.winnerCheck('cross') === 'cross') displayController.winnerDeclaration('Cross');
+                    if (gameBoard.winnerCheck('nought') === 'nought') displayController.winnerDeclaration('Nought');
+                    
                 }
 
-                if (round === 10) displayController.drawDeclaration();  
+                if (round === 10 && gameBoard.winnerCheck(mark) === undefined) displayController.drawDeclaration();  
             })
         })
     }
@@ -100,19 +107,24 @@ const Player = (mark) => {
         playerMove,
         round,
         getMark,
-        _roundCount,
     }
 }
 
 const displayController = (() => {
+    
+    const _result = document.querySelector('.result');
 
     const drawDeclaration = () => {
-        const winner = document.querySelector('.winner');
-        winner.textContent = "It is a draw!";
+        _result.textContent = "It is a draw!";
+    }
+
+    const winnerDeclaration = (mark) => {
+        _result.textContent = `${mark} is the winner!`;
     }
 
     return{
         drawDeclaration,
+        winnerDeclaration,
     }
 
 })();
