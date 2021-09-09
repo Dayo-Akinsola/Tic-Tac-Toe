@@ -47,16 +47,16 @@ h3{
 
 .XO-button{
     border-radius: 4px;
-    background-color: #5ca1e1;
+    background-color: #374049;
     border: none;
     color: #fff;
     text-align: center;
-    font-size: 32px;
-    padding: 16px;
-    width: 220px;
+    font-size: 24px;
+    padding: 10px;
+    width: 150px;
     transition: all 0.5s;
     cursor: pointer;
-    margin: 36px;
+    margin: 16px;
     box-shadow: 0 10px 20px -8px rgba(0, 0, 0,.7);
 }
 
@@ -65,7 +65,59 @@ h3{
     cursor: pointer;
 }
 
+.XO-button:hover::before {
+    width: 0px;
+    background: #5ca1e1;
+}
+  
+.XO-button:hover::after {
+    height: 0px;
+    background: #5ca1e1;
+}
+  
+.XO-button:hover {
+    background: #5ca1e1;
+}
+.XO-button:active{
+    box-shadow: 0 5px 10px -8px rgba(0, 0, 0,.7);
+    transform: translateY(3px);
+    
+}
 
+.XO-button.clicked{
+    box-shadow: 0 5px 10px -8px rgba(0, 0, 0,.7);
+    transform: translateY(3px);
+    background: #5ca1e1;
+}
+
+.reset{
+    margin-top: 60px;
+    position: absolute;
+}
+
+.reset-button{
+    border-radius: 4px;
+    background-color: #374049;
+    border: none;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+    padding: 12px;
+    width: 100px;
+    transition: all 1s;
+    cursor: pointer;
+    margin: 16px;
+    box-shadow: 0 10px 20px -8px rgba(0, 0, 0,.7);
+}
+
+.reset-button:hover{
+    background: #5ca1e1;
+}
+
+.reset-button:active{
+    color:rgba(0, 0, 0,.7);
+    transition: 1s;
+}
 
 .game-square{
     display: block;
