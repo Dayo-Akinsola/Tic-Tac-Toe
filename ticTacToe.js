@@ -62,7 +62,14 @@ const gameBoard = (function() {
 
 const Player = (mark) => {
 
+
     const getMark = () => mark;
+
+    const changeMark = () => {
+        if (mark === 'cross') mark = 'nought';
+        else mark = 'cross';
+    }
+    
     
     let round = 1;
 
@@ -72,18 +79,33 @@ const Player = (mark) => {
     }
 
     const _playRound = (square, opponent) => {
-        switch(round % 2 === 1){
-            case true:
-                gameBoard.board.push('&#10539;');
-                square.classList.add(mark);
-                gameBoard.render(square);
-                break;
-            case false:
-                gameBoard.board.push('&#79;');
-                square.classList.add(opponent.getMark());
-                gameBoard.render(square);
+        if (mark === 'cross'){
+            switch(round % 2 === 1){
+                case true:
+                    gameBoard.board.push('&#10539;');
+                    square.classList.add(mark);
+                    gameBoard.render(square);
+                    break;
+                case false:
+                    gameBoard.board.push('&#79;');
+                    square.classList.add(opponent.getMark());
+                    gameBoard.render(square);
             }
-        
+        }
+
+        else{
+            switch(round % 2 === 1){
+                case true:
+                    gameBoard.board.push('&#10539;');
+                    square.classList.add(opponent.getMark());
+                    gameBoard.render(square);
+                    break;
+                case false:
+                    gameBoard.board.push('&#79;');
+                    square.classList.add(mark);
+                    gameBoard.render(square);
+            }
+        }
     }
 
     const playerMove = (opponent) => {
@@ -98,21 +120,27 @@ const Player = (mark) => {
                     
                 }
 
-                if (round === 10 && gameBoard.winnerCheck(mark) === undefined) displayController.drawDeclaration();  
+                if (round === 10 && gameBoard.winnerCheck('cross') === undefined 
+                && gameBoard.winnerCheck('nought')) displayController.drawDeclaration();  
+
             })
         })
     }
-    
+
     return{
         playerMove,
         round,
         getMark,
+        changeMark,
     }
 }
 
 const displayController = (() => {
     
     const _result = document.querySelector('.result');
+    const _markButtons = document.querySelectorAll('.XO-button');
+    const _resetButton = document.querySelector('.reset-button');
+
 
     const drawDeclaration = () => {
         _result.textContent = "It is a draw!";
@@ -122,15 +150,51 @@ const displayController = (() => {
         _result.textContent = `${mark} is the winner!`;
     }
 
+    const swapMarks = (player, opponent) => {
+        _markButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Applies .clicked css settings to a mark button when clicked and applies the settings to
+                // the opposite mark on the other side.
+                if (!Array.from(button.classList).includes('clicked')){
+                    _markButtons.forEach(button => button.classList.remove('clicked'));
+                    button.classList.add('clicked');
+                    if (button === _markButtons[0]) _markButtons[3].classList.add('clicked');
+                    else if (button === _markButtons[1]) _markButtons[2].classList.add('clicked');
+                    else if (button === _markButtons[2]) _markButtons[1].classList.add('clicked');
+                    else if (button === _markButtons[3]) _markButtons[0].classList.add('clicked');
+
+                    player.changeMark();
+                    opponent.changeMark();
+                }
+            })
+        })
+    }
+
+    const resetGame = (player) => {
+        _resetButton.addEventListener('click', () => {
+            gameBoard.gameSquares.forEach(square => {
+                square.classList.remove('cross'); square.classList.remove('nought');
+                square.textContent = '';
+            })
+            gameBoard.board = [];
+            player.round = 1;
+        })
+    }
+
     return{
         drawDeclaration,
         winnerDeclaration,
+        swapMarks,
+        resetGame,
     }
 
 })();
 
 const player1 = Player('cross');
 const player2 = Player('nought');   
+displayController.swapMarks(player1, player2);
+displayController.resetGame(player1);
+console.log(player1.round);
 
 player1.playerMove(player2);
 
