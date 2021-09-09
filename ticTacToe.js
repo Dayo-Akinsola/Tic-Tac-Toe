@@ -6,7 +6,7 @@ const gameBoard = (function() {
     const gameSquares = document.querySelectorAll('.game-square');
 
     const render = (square) => {
-            square.innerHTML = board[board.length - 1];
+        square.innerHTML = board[board.length - 1];
     }
 
     return {
@@ -16,48 +16,53 @@ const gameBoard = (function() {
     };
 })();
 
-const Player = (name) => {
-    const _playerName = name;
+const Player = (mark) => {
 
+    const getMark = () => mark;
+    
     let round = 1;
 
     const _roundCount = () => round++;
 
-    const _playRound = (square) => {
+    const _playRound = (square, opponent) => {
         switch(round % 2 === 1){
             case true:
                 gameBoard.board.push('&#10539;');
+                square.classList.add(mark);
                 gameBoard.render(square);
                 break;
             case false:
                 gameBoard.board.push('&#79;');
+                square.classList.add(opponent.getMark());
                 gameBoard.render(square);
             }
         
     }
 
-    const playerMove = (mark) => {
+    const playerMove = (opponent) => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
-                square.classList.add(mark);
-                _playRound(square);
-                _roundCount();
+                if (!Array.from(square.classList).includes('cross') && !Array.from(square.classList).includes('nought')){
+                    _playRound(square, opponent);
+                    _roundCount();
+                }
             })
         })
     }
     
     return{
         playerMove,
+        round,
+        getMark,
     }
 }
 
-const player1 = Player('Player 1');
-const player2 = Player('Player 2');
+const player1 = Player('cross');
+const player2 = Player('nought');
 
 const displayController = (() => {
 
     const simulateGame = () => {
-        
     }
 
     return {
@@ -65,11 +70,7 @@ const displayController = (() => {
     }
 })();
 
-player1.playerMove('cross');
-player2.playerMove('nought');
-
-
-
+player1.playerMove(player2);
 
 
 
