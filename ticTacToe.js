@@ -65,6 +65,11 @@ const gameBoard = (function() {
 
 const Player = (mark) => {
 
+    const _isComputer = false;
+
+    const _toggleComputer = () => {
+
+    }
 
     const getMark = () => mark;
 
@@ -110,10 +115,8 @@ const Player = (mark) => {
                 && !Array.from(square.classList).includes('nought') 
                 && gameBoard.board.length < 9){
                     _playRound(square, opponent);
-                    console.log(gameBoard.board);
                     if (gameBoard.winnerCheck('cross') === 'cross') displayController.winnerDeclaration('Cross');
                     if (gameBoard.winnerCheck('nought') === 'nought') displayController.winnerDeclaration('Nought');
-                    
                 }
 
                 if (gameBoard.board.length === 9 && gameBoard.winnerCheck('cross') === undefined 
@@ -160,6 +163,11 @@ const displayController = (() => {
 
                     player.changeMark();
                     opponent.changeMark();
+                    gameBoard.gameSquares.forEach(square => {
+                        square.classList.remove('cross'); square.classList.remove('nought');
+                        square.textContent = '';
+                    })
+                    gameBoard.board.length = 0;
                 }
             })
         })
