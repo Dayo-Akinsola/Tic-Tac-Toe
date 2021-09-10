@@ -78,6 +78,11 @@ const Player = (mark) => {
         return round;
     }
 
+    const resetRounds = () => {
+        round = 1;
+        console.log('heelo');
+    }
+
     const _playRound = (square, opponent) => {
         if (mark === 'cross'){
             switch(round % 2 === 1){
@@ -114,6 +119,7 @@ const Player = (mark) => {
                 if (!Array.from(square.classList).includes('cross') && !Array.from(square.classList).includes('nought') && round <=9){
                     _playRound(square, opponent);
                     _roundCount();
+                    console.log(gameBoard.board);
 
                     if (gameBoard.winnerCheck('cross') === 'cross') displayController.winnerDeclaration('Cross');
                     if (gameBoard.winnerCheck('nought') === 'nought') displayController.winnerDeclaration('Nought');
@@ -132,14 +138,15 @@ const Player = (mark) => {
         round,
         getMark,
         changeMark,
+        resetRounds,
     }
 }
 
 const displayController = (() => {
     
+    const _resetButton = document.querySelector('.reset-button');
     const _result = document.querySelector('.result');
     const _markButtons = document.querySelectorAll('.XO-button');
-    const _resetButton = document.querySelector('.reset-button');
 
 
     const drawDeclaration = () => {
@@ -177,7 +184,7 @@ const displayController = (() => {
                 square.textContent = '';
             })
             gameBoard.board = [];
-            player.round = 1;
+            player.resetRounds();
         })
     }
 
