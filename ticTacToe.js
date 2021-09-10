@@ -8,7 +8,6 @@ const gameBoard = (function() {
     const render = (square) => {
         square.innerHTML = board[board.length - 1];
         console.log('board module');
-        console.log(board);
     }
 
 
@@ -78,49 +77,39 @@ const Player = (mark) => {
         else mark = 'cross';
     } 
 
-    const _playRound = (square, opponent) => {
-        if (mark === 'cross'){
+    const _playRound = (square) => {
             switch(gameBoard.board.length % 2 === 0){
                 case true:
                     gameBoard.board.push('&#10539;');
-                    square.classList.add(mark);
+                    square.classList.add('cross');
                     gameBoard.render(square);
                     break;
                 case false:
                     gameBoard.board.push('&#79;');
-                    square.classList.add(opponent.getMark());
+                    square.classList.add('nought');
                     gameBoard.render(square);
             }
-        }
-
-        else{
-            switch(gameBoard.board.length % 2 === 0){
-                case true:
-                    gameBoard.board.push('&#10539;');
-                    square.classList.add(opponent.getMark());
-                    gameBoard.render(square);
-                    break;
-                case false:
-                    gameBoard.board.push('&#79;');
-                    square.classList.add(mark);
-                    gameBoard.render(square);
-            }
-        }
+        
     }
 
-    const playerMove = (opponent) => {
+    // Checks if a player has one or if there is a draw after a move has been made.
+    const _checkMove = (square) => {
+        if (!Array.from(square.classList).includes('cross') 
+        && !Array.from(square.classList).includes('nought') 
+        && gameBoard.board.length < 9){
+            _playRound(square);
+            if (gameBoard.winnerCheck('cross') === 'cross') displayController.winnerDeclaration('Cross');
+            if (gameBoard.winnerCheck('nought') === 'nought') displayController.winnerDeclaration('Nought');
+            }
+
+            if (gameBoard.board.length === 9 && gameBoard.winnerCheck('cross') === undefined 
+            && gameBoard.winnerCheck('nought') === undefined) displayController.drawDeclaration(); 
+    }
+
+    const playerMove = () => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
-                if (!Array.from(square.classList).includes('cross') 
-                && !Array.from(square.classList).includes('nought') 
-                && gameBoard.board.length < 9){
-                    _playRound(square, opponent);
-                    if (gameBoard.winnerCheck('cross') === 'cross') displayController.winnerDeclaration('Cross');
-                    if (gameBoard.winnerCheck('nought') === 'nought') displayController.winnerDeclaration('Nought');
-                }
-
-                if (gameBoard.board.length === 9 && gameBoard.winnerCheck('cross') === undefined 
-                && gameBoard.winnerCheck('nought') === undefined) displayController.drawDeclaration();  
+                _checkMove(square);
 
             })
         })
