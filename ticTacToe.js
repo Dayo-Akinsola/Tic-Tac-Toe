@@ -7,7 +7,10 @@ const gameBoard = (function() {
 
     const render = (square) => {
         square.innerHTML = board[board.length - 1];
+        console.log('board module');
+        console.log(board);
     }
+
 
     // These functions check if there are three noughts or crosses in a row.
     const _vertWinnerCheck = (mark) => {
@@ -68,24 +71,11 @@ const Player = (mark) => {
     const changeMark = () => {
         if (mark === 'cross') mark = 'nought';
         else mark = 'cross';
-    }
-    
-    
-    let round = 1;
-
-    const _roundCount = () => {
-        round++;
-        return round;
-    }
-
-    const resetRounds = () => {
-        round = 1;
-        console.log('heelo');
-    }
+    } 
 
     const _playRound = (square, opponent) => {
         if (mark === 'cross'){
-            switch(round % 2 === 1){
+            switch(gameBoard.board.length % 2 === 0){
                 case true:
                     gameBoard.board.push('&#10539;');
                     square.classList.add(mark);
@@ -99,7 +89,7 @@ const Player = (mark) => {
         }
 
         else{
-            switch(round % 2 === 1){
+            switch(gameBoard.board.length % 2 === 0){
                 case true:
                     gameBoard.board.push('&#10539;');
                     square.classList.add(opponent.getMark());
@@ -116,18 +106,18 @@ const Player = (mark) => {
     const playerMove = (opponent) => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
-                if (!Array.from(square.classList).includes('cross') && !Array.from(square.classList).includes('nought') && round <=9){
+                if (!Array.from(square.classList).includes('cross') 
+                && !Array.from(square.classList).includes('nought') 
+                && gameBoard.board.length < 9){
                     _playRound(square, opponent);
-                    _roundCount();
                     console.log(gameBoard.board);
-
                     if (gameBoard.winnerCheck('cross') === 'cross') displayController.winnerDeclaration('Cross');
                     if (gameBoard.winnerCheck('nought') === 'nought') displayController.winnerDeclaration('Nought');
                     
                 }
 
-                if (round === 10 && gameBoard.winnerCheck('cross') === undefined 
-                && gameBoard.winnerCheck('nought')) displayController.drawDeclaration();  
+                if (gameBoard.board.length === 9 && gameBoard.winnerCheck('cross') === undefined 
+                && gameBoard.winnerCheck('nought') === undefined) displayController.drawDeclaration();  
 
             })
         })
@@ -135,10 +125,8 @@ const Player = (mark) => {
 
     return{
         playerMove,
-        round,
         getMark,
         changeMark,
-        resetRounds,
     }
 }
 
@@ -177,14 +165,13 @@ const displayController = (() => {
         })
     }
 
-    const resetGame = (player) => {
+    const resetGame = () => {
         _resetButton.addEventListener('click', () => {
             gameBoard.gameSquares.forEach(square => {
                 square.classList.remove('cross'); square.classList.remove('nought');
                 square.textContent = '';
             })
-            gameBoard.board = [];
-            player.resetRounds();
+            gameBoard.board.length = 0;
         })
     }
 
@@ -200,8 +187,7 @@ const displayController = (() => {
 const player1 = Player('cross');
 const player2 = Player('nought');   
 displayController.swapMarks(player1, player2);
-displayController.resetGame(player1);
-console.log(player1.round);
+displayController.resetGame();
 
 player1.playerMove(player2);
 
