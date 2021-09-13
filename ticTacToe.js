@@ -7,7 +7,6 @@ const gameBoard = (function() {
 
     const render = (square) => {
         square.innerHTML = board[board.length - 1];
-        console.log('board module');
     }
 
 
@@ -64,10 +63,16 @@ const gameBoard = (function() {
 
 const Player = (mark) => {
 
-    const _isComputer = false;
+    const _opponentMode = document.querySelector('select');
 
-    const _toggleComputer = () => {
-
+    let isComputer = true;
+    
+    const toggleComputer = () =>  {
+        _opponentMode.addEventListener('change', () => {
+            _opponentMode.value === 'friend' ? isComputer = false : isComputer = true;
+            displayController.resetGame();
+        })
+        
     }
 
     const getMark = () => mark;
@@ -92,7 +97,7 @@ const Player = (mark) => {
         
     }
 
-    // Checks if a player has one or if there is a draw after a move has been made.
+    // Checks if a player has won or if there is a draw after a move has been made.
     const _checkMove = (square) => {
         if (!Array.from(square.classList).includes('cross') 
         && !Array.from(square.classList).includes('nought') 
@@ -106,19 +111,50 @@ const Player = (mark) => {
             && gameBoard.winnerCheck('nought') === undefined) displayController.drawDeclaration(); 
     }
 
-    const playerMove = () => {
+    const friendMode = () => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
-                _checkMove(square);
+                if (isComputer === false) _checkMove(square);
+            })
+        })
+        }
 
+    const computerMove = () => {
+        // picks random square on game grid if the the square has already been used the computer picks another one
+        let boardPlacement = Math.floor((Math.random() * 8));
+        if(Array.from(gameBoard.gameSquares[boardPlacement].classList).includes('cross') 
+        || Array.from(gameBoard.gameSquares[boardPlacement].classList).includes('nought')){
+            computerMove();
+        }
+        _checkMove(gameBoard.gameSquares[boardPlacement]);
+    }
+
+    const playerVsComputer = () => {
+            gameBoard.gameSquares.forEach(square => {
+                square.addEventListener('click', () => {
+                if (isComputer === true){
+                    if (mark === 'cross'){
+                        _checkMove(square);
+                        computerMove()
+                    }
+                    else{
+                        computerMove()
+                        _checkMove(square);
+                        console.log('hello');
+                    }
+                }    
             })
         })
     }
 
     return{
-        playerMove,
+        friendMode,
         getMark,
         changeMark,
+        toggleComputer,
+        playerVsComputer,
+        isComputer,
+        computerMove,
     }
 }
 
@@ -127,7 +163,6 @@ const displayController = (() => {
     const _resetButton = document.querySelector('.reset-button');
     const _result = document.querySelector('.result');
     const _markButtons = document.querySelectorAll('.XO-button');
-
 
     const drawDeclaration = () => {
         _result.textContent = "It is a draw!";
@@ -152,23 +187,25 @@ const displayController = (() => {
 
                     player.changeMark();
                     opponent.changeMark();
-                    gameBoard.gameSquares.forEach(square => {
-                        square.classList.remove('cross'); square.classList.remove('nought');
-                        square.textContent = '';
-                    })
-                    gameBoard.board.length = 0;
+                    resetGame();
+                    if (player.getMark() === 'nought' && player.isComputer === true) player.computerMove();
                 }
             })
         })
     }
 
     const resetGame = () => {
+        gameBoard.gameSquares.forEach(square => {
+            square.classList.remove('cross'); square.classList.remove('nought');
+            square.textContent = '';
+        })
+        gameBoard.board.length = 0;
+    }
+
+    const resetListener = (player) => {
         _resetButton.addEventListener('click', () => {
-            gameBoard.gameSquares.forEach(square => {
-                square.classList.remove('cross'); square.classList.remove('nought');
-                square.textContent = '';
-            })
-            gameBoard.board.length = 0;
+            resetGame();
+            if (player.getMark() === 'nought' && player.isComputer === true) player.computerMove();
         })
     }
 
@@ -177,6 +214,7 @@ const displayController = (() => {
         winnerDeclaration,
         swapMarks,
         resetGame,
+        resetListener,
     }
 
 })();
@@ -184,7 +222,8 @@ const displayController = (() => {
 const player1 = Player('cross');
 const player2 = Player('nought');   
 displayController.swapMarks(player1, player2);
-displayController.resetGame();
+player1.toggleComputer();
+displayController.resetListener(player1);
 
-player1.playerMove(player2);
-
+player1.friendMode();
+player1.playerVsComputer();
