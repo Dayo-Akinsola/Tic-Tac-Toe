@@ -69,12 +69,40 @@ const Player = (mark) => {
 
     let gameOver = false;
 
+    const minMax = (position, depth, maximizingPlayer) => {
+        if (depth === 0) return position;
+
+        if (maximizingPlayer){
+            let maxEval = -Infinity;
+            for (let i = 0; i < Array.from(gameBoard.gameSquares).length; i++){
+                if (!_isSquareFilled(i)){
+                    let eva = minMax(i, depth - 1, true)
+                    maxEval = Math.max(maxEval, eva);
+                }
+            }
+            return maxEval;
+        }
+
+        else{
+            let minEval = Infinity;
+            for (let i = 0; Array.from(gameBoard.gameSquares.length); i++){
+                if (!_isSquareFilled(i)){
+                    let eva = minMax(i, depth - 1, false);
+                    minEval = Math.max(minEval, eva); 
+                }
+            }
+            return minEval;
+        }
+        
+    }
+
     const restart = () => gameOver = false;
     
-    const toggleComputer = () =>  {
+    const toggleComputer = (player) =>  {
         _opponentMode.addEventListener('change', () => {
             _opponentMode.value === 'friend' ? isComputer = false : isComputer = true;
-            displayController.resetGame();
+            displayController.resetGame(player);
+            if (isComputer === true && mark === 'nought') computerMove();
         })
         
     }
@@ -121,7 +149,6 @@ const Player = (mark) => {
             if (gameBoard.winnerCheck('cross') === 'cross') {
                 displayController.winnerDeclaration('Cross');
                 gameOver = true;
-                console.log(gameOver);
             }
             if (gameBoard.winnerCheck('nought') === 'nought') {
                 displayController.winnerDeclaration('Nought');
@@ -142,7 +169,7 @@ const Player = (mark) => {
                 if (isComputer === false) _checkMove(square);
             })
         })
-        }
+    }
 
     const computerMove = () => {
         // picks random square on game grid if the the square has already been used the computer picks another one
@@ -158,7 +185,9 @@ const Player = (mark) => {
     const playerVsComputer = () => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
-            if (isComputer === true && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false){
+            if (isComputer === true 
+                && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false 
+                && _opponentMode.value === 'easy' || _opponentMode.value === 'medium'){
                 if (mark === 'cross'){
                     _checkMove(square);
                     computerMove();
@@ -172,6 +201,18 @@ const Player = (mark) => {
         })
     }
 
+    const playerVsExtreme = () => {
+        gameBoard.gameSquares.forEach(square => {
+            square.addEventListener('click', () => {
+                if (isComputer === true && _opponentMode.value === 'extreme'){
+                    _checkMove(square);
+                    let computerPlayIndex = minMax(4, 4, true);
+                    _checkMove(gameBoard.gameSquares[computerPlayIndex]);
+                }
+            })
+        })
+    }
+
     return{
         friendMode,
         getMark,
@@ -181,6 +222,7 @@ const Player = (mark) => {
         isComputer,
         computerMove,
         restart,
+        playerVsExtreme,
     }
 }
 
@@ -254,8 +296,9 @@ const displayController = (() => {
 const player1 = Player('cross');
 const player2 = Player('nought');   
 displayController.swapMarks(player1, player2);
-player1.toggleComputer();
+player1.toggleComputer(player1);
 displayController.resetListener(player1);
 
 player1.friendMode();
 player1.playerVsComputer();
+player1.playerVsExtreme();
