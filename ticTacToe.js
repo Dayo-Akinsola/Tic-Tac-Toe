@@ -66,6 +66,10 @@ const Player = (mark) => {
     const _opponentMode = document.querySelector('select');
 
     let isComputer = true;
+
+    let gameOver = false;
+
+    const restart = () => gameOver = false;
     
     const toggleComputer = () =>  {
         _opponentMode.addEventListener('change', () => {
@@ -81,6 +85,16 @@ const Player = (mark) => {
         if (mark === 'cross') mark = 'nought';
         else mark = 'cross';
     } 
+    
+    //Checks if a square already has a nought or cross in it.
+    const _isSquareFilled = (squareIndex) =>{
+        if(Array.from(gameBoard.gameSquares[squareIndex].classList).includes('cross') 
+        || Array.from(gameBoard.gameSquares[squareIndex].classList).includes('nought')){
+            return true;
+        }
+
+        return false;
+    }
 
     const _playRound = (square) => {
             switch(gameBoard.board.length % 2 === 0){
@@ -101,14 +115,25 @@ const Player = (mark) => {
     const _checkMove = (square) => {
         if (!Array.from(square.classList).includes('cross') 
         && !Array.from(square.classList).includes('nought') 
-        && gameBoard.board.length < 9){
+        && gameBoard.board.length < 9
+        && gameOver === false){
             _playRound(square);
-            if (gameBoard.winnerCheck('cross') === 'cross') displayController.winnerDeclaration('Cross');
-            if (gameBoard.winnerCheck('nought') === 'nought') displayController.winnerDeclaration('Nought');
+            if (gameBoard.winnerCheck('cross') === 'cross') {
+                displayController.winnerDeclaration('Cross');
+                gameOver = true;
+                console.log(gameOver);
             }
+            if (gameBoard.winnerCheck('nought') === 'nought') {
+                displayController.winnerDeclaration('Nought');
+                gameOver = true;
+            }
+        }
 
             if (gameBoard.board.length === 9 && gameBoard.winnerCheck('cross') === undefined 
-            && gameBoard.winnerCheck('nought') === undefined) displayController.drawDeclaration(); 
+            && gameBoard.winnerCheck('nought') === undefined) {
+                displayController.drawDeclaration(); 
+                gameOver = true;
+            }
     }
 
     const friendMode = () => {
@@ -121,27 +146,27 @@ const Player = (mark) => {
 
     const computerMove = () => {
         // picks random square on game grid if the the square has already been used the computer picks another one
-        let boardPlacement = Math.floor((Math.random() * 8));
-        if(Array.from(gameBoard.gameSquares[boardPlacement].classList).includes('cross') 
-        || Array.from(gameBoard.gameSquares[boardPlacement].classList).includes('nought')){
+        let boardPlacement = Math.floor((Math.random() * 9));
+        console.log(boardPlacement);
+        if(_isSquareFilled(boardPlacement) === true && gameOver === false){
             computerMove();
         }
+
         _checkMove(gameBoard.gameSquares[boardPlacement]);
     }
 
     const playerVsComputer = () => {
-            gameBoard.gameSquares.forEach(square => {
-                square.addEventListener('click', () => {
-                if (isComputer === true){
-                    if (mark === 'cross'){
-                        _checkMove(square);
-                        computerMove()
-                    }
-                    else{
-                        computerMove()
-                        _checkMove(square);
-                        console.log('hello');
-                    }
+        gameBoard.gameSquares.forEach(square => {
+            square.addEventListener('click', () => {
+            if (isComputer === true && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false){
+                if (mark === 'cross'){
+                    _checkMove(square);
+                    computerMove();
+                }
+                else{
+                    _checkMove(square);
+                    computerMove();
+                }
                 }    
             })
         })
@@ -155,6 +180,7 @@ const Player = (mark) => {
         playerVsComputer,
         isComputer,
         computerMove,
+        restart,
     }
 }
 
@@ -187,25 +213,31 @@ const displayController = (() => {
 
                     player.changeMark();
                     opponent.changeMark();
-                    resetGame();
-                    if (player.getMark() === 'nought' && player.isComputer === true) player.computerMove();
+                    resetGame(player);
+                    if (player.getMark() === 'nought' 
+                    && document.querySelector('select').value !== 'friend') 
+                    player.computerMove();
+
                 }
             })
         })
     }
 
-    const resetGame = () => {
+    const resetGame = (player) => {
         gameBoard.gameSquares.forEach(square => {
             square.classList.remove('cross'); square.classList.remove('nought');
             square.textContent = '';
         })
+        player.restart();
         gameBoard.board.length = 0;
     }
 
     const resetListener = (player) => {
         _resetButton.addEventListener('click', () => {
-            resetGame();
-            if (player.getMark() === 'nought' && player.isComputer === true) player.computerMove();
+            resetGame(player);
+            if (player.getMark() === 'nought' 
+            && document.querySelector('select').value !== 'friend') 
+            player.computerMove();
         })
     }
 
