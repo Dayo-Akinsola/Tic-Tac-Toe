@@ -200,19 +200,23 @@ const Player = (mark) => {
         && gameBoard.board.length < 9
         && gameOver === false){
             _playRound(square);
+            console.log(gameBoard.board.length);
             if (gameBoard.winnerCheck('cross') === 'cross') {
                 displayController.winnerDeclaration('Cross');
                 gameOver = true;
+                console.log('cross wins');
             }
             else if (gameBoard.winnerCheck('nought') === 'nought') {
                 displayController.winnerDeclaration('Nought');
                 gameOver = true;
+                console.log('nought wins');
             }
         }
 
-            else if (gameBoard.winnerCheck(mark) === 'draw') {
+            else if (gameBoard.winnerCheck(mark) === 'draw' && gameOver === false) {
                 displayController.drawDeclaration(); 
                 gameOver = true;
+                console.log('draw');
             }
     }
 
