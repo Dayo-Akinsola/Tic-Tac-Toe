@@ -156,36 +156,14 @@ const Player = (mark) => {
         _checkMove(gameBoard.gameSquares[boardPlacement]);
     }
 
-    const extremeMove = () => {
-        let bestScore = Infinity;
-        let bestMove;
-
-        for (let i = 0; i < Array.from(gameBoard.gameSquares).length ; i++){
-            if (!_isSquareFilled(i) && gameOver === false){
-                gameBoard.gameSquares[i].classList.add('nought');
-                gameBoard.board.push('&#79;');
-
-                let value = miniMax(gameBoard.gameSquares, 0, true);
-
-                gameBoard.gameSquares[i].classList.remove('nought');
-                gameBoard.board.pop();
-
-                if (value < bestScore){
-                    bestScore = value;
-                    bestMove = i;
-                }
-            }
-        }
-
-        _checkMove(gameBoard.gameSquares[bestMove]);
-    }
-
-    const playerVsComputer = () => {
+    const playerVsEasy = () => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
             if (isComputer === true 
+                && gameOver === false
                 && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false 
                 && _opponentMode.value === 'easy' || _opponentMode.value === 'medium'){
+
                     if (mark === 'cross'){
                         _checkMove(square);
                         computerMove();
@@ -199,18 +177,76 @@ const Player = (mark) => {
         })
     }
 
-    const _extremeFirstMove = () => {
-        //If statements handle the computer's first move so there is less work to do in the minimax algorithm
+    const _extremeMoveO = () => {
+        let bestScore = -Infinity;
+        let bestMove;
+
+        for (let i = 0; i < Array.from(gameBoard.gameSquares).length ; i++){
+            if (!_isSquareFilled(i) && gameOver === false){
+                gameBoard.gameSquares[i].classList.add('cross');
+                gameBoard.board.push('&#10539;');
+
+                let value = _miniMax(gameBoard.gameSquares, 0, false);
+
+                gameBoard.gameSquares[i].classList.remove('cross');
+                gameBoard.board.pop();
+
+                if (value > bestScore){
+                    bestScore = value;
+                    bestMove = i;
+                }
+            }
+        }
+
+        _checkMove(gameBoard.gameSquares[bestMove]);
+    }
+
+    const _extremeMoveX = () => {
+        let bestScore = Infinity;
+        let bestMove;
+
+        for (let i = 0; i < Array.from(gameBoard.gameSquares).length ; i++){
+            if (!_isSquareFilled(i) && gameOver === false){
+                gameBoard.gameSquares[i].classList.add('nought');
+                gameBoard.board.push('&#79;');
+
+                let value = _miniMax(gameBoard.gameSquares, 0, true);
+
+                gameBoard.gameSquares[i].classList.remove('nought');
+                gameBoard.board.pop();
+
+                if (value < bestScore){
+                    bestScore = value;
+                    bestMove = i;
+                }
+            }
+        }
+
+        _checkMove(gameBoard.gameSquares[bestMove]);
+    }
+    
+    //If statements handle the computer's first move so there is less work to do in the miniMax algorithm
+    const _extremeFirstMoveX = () => {
         if (_isSquareFilled(0) || _isSquareFilled(2) || _isSquareFilled(6) || _isSquareFilled(8))
             _checkMove(gameBoard.gameSquares[4]);
 
-            else if ( _isSquareFilled(5) || _isSquareFilled(7)) _checkMove(gameBoard.gameSquares[8]);
+        else if ( _isSquareFilled(5) || _isSquareFilled(7)) _checkMove(gameBoard.gameSquares[8]);
 
-            else if (_isSquareFilled(1)) _checkMove(gameBoard.gameSquares[2]);
+        else if (_isSquareFilled(1)) _checkMove(gameBoard.gameSquares[2]);
 
-            else if (_isSquareFilled(3)) _checkMove(gameBoard.gameSquares[6]);
+        else if (_isSquareFilled(3)) _checkMove(gameBoard.gameSquares[6]);
 
-            else if (_isSquareFilled(4)) _checkMove(gameBoard.gameSquares[0]);
+        else if (_isSquareFilled(4)) _checkMove(gameBoard.gameSquares[0]);
+    }
+
+    const _extremeFirstMoveO = () => {
+        if (_isSquareFilled(5) || _isSquareFilled(8) || _isSquareFilled(7)) 
+            _checkMove(gameBoard.gameSquares[2]);
+
+        else if ( _isSquareFilled(3) || _isSquareFilled(6) || _isSquareFilled(4)) 
+            _checkMove(gameBoard.gameSquares[1]);
+        
+        else if (_isSquareFilled(1) || _isSquareFilled(2)) _checkMove(gameBoard.gameSquares[3]);
 
     }
 
@@ -218,38 +254,41 @@ const Player = (mark) => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
                 if (isComputer === true && _opponentMode.value === 'extreme' 
-                && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false){
+                && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false
+                && gameOver === false){
                    if (mark === 'cross'){
                         _checkMove(square);
-                        if (gameBoard.board.length === 1) _extremeFirstMove();
-                        else if (gameBoard.board.length < 9) extremeMove();
+                        if (gameBoard.board.length === 1) _extremeFirstMoveX();
+                        else if (gameBoard.board.length < 9) _extremeMoveX();
                    }
 
                    else{
-                       if (gameBoard.board.length === 0) _checkMove(gameBoard.gameSquares[0]);
-                       else extremeMove();
-                       _checkMove(square);
+                        _checkMove(square);
+                        if (gameBoard.board.length === 2) _extremeFirstMoveO();
+                        else if (gameBoard.board.length < 9) _extremeMoveO();
                    }
                 }
             })
         })
     }
 
-    let positionEval = {
+    // Used to score the outcomes of the miniMax algorithm
+    let _positionEval = {
         'cross': 1,
         'nought': -1,
         'draw': 0,
     };
 
-    const miniMax = (position, depth, maximizingPlayer)=> {
+
+    const _miniMax = (position, depth, maximizingPlayer)=> {
         let result;
         if (gameBoard.winnerCheck('cross') === 'cross') result = 'cross';
         else if (gameBoard.winnerCheck('nought') === 'nought') result = 'nought';
         else if (gameBoard.board.length === 9) result = 'draw';
         else result = undefined;
 
-        if (result !== undefined){
-            return positionEval[result];
+        if (result !== undefined || depth === -1){
+            return _positionEval[result];
         }
 
         if (maximizingPlayer){
@@ -259,7 +298,7 @@ const Player = (mark) => {
                     gameBoard.board.push('&#10539;');
                     gameBoard.gameSquares[i].classList.add('cross');
 
-                    let value = miniMax(gameBoard.gameSquares , depth + 1, false);
+                    let value = _miniMax(gameBoard.gameSquares , depth + 1, false);
                     maxEval = Math.max(maxEval, value);
 
                     gameBoard.gameSquares[i].classList.remove('cross');
@@ -277,7 +316,7 @@ const Player = (mark) => {
                     gameBoard.board.push('&#79;');
                     gameBoard.gameSquares[i].classList.add('nought');
 
-                    let value = miniMax(gameBoard.gameSquares, depth + 1, true);
+                    let value = _miniMax(gameBoard.gameSquares, depth + 1, true);
                     minEval = Math.min(minEval, value);
 
                     gameBoard.gameSquares[i].classList.remove('nought');
@@ -296,7 +335,7 @@ const Player = (mark) => {
         getMark,
         changeMark,
         toggleComputer,
-        playerVsComputer,
+        playerVsEasy,
         isComputer,
         computerMove,
         restart,
@@ -378,5 +417,5 @@ player1.toggleComputer(player1);
 displayController.resetListener(player1);
 
 player1.friendMode();
-player1.playerVsComputer();
+player1.playerVsEasy();
 player1.playerVsExtreme();
