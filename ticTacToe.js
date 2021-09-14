@@ -51,6 +51,8 @@ const gameBoard = (function() {
         || _diagWinnerCheck(mark) === mark){
             return mark;
         }
+
+        else if (board.length === 9) return 'draw';
     }
 
     return {
@@ -68,33 +70,6 @@ const Player = (mark) => {
     let isComputer = true;
 
     let gameOver = false;
-
-    const minMax = (position, depth, maximizingPlayer) => {
-        if (depth === 0) return position;
-
-        if (maximizingPlayer){
-            let maxEval = -Infinity;
-            for (let i = 0; i < Array.from(gameBoard.gameSquares).length; i++){
-                if (!_isSquareFilled(i)){
-                    let eva = minMax(i, depth - 1, true)
-                    maxEval = Math.max(maxEval, eva);
-                }
-            }
-            return maxEval;
-        }
-
-        else{
-            let minEval = Infinity;
-            for (let i = 0; Array.from(gameBoard.gameSquares.length); i++){
-                if (!_isSquareFilled(i)){
-                    let eva = minMax(i, depth - 1, false);
-                    minEval = Math.max(minEval, eva); 
-                }
-            }
-            return minEval;
-        }
-        
-    }
 
     const restart = () => gameOver = false;
     
@@ -156,8 +131,7 @@ const Player = (mark) => {
             }
         }
 
-            if (gameBoard.board.length === 9 && gameBoard.winnerCheck('cross') === undefined 
-            && gameBoard.winnerCheck('nought') === undefined) {
+            if (gameBoard.winnerCheck(mark) === 'draw') {
                 displayController.drawDeclaration(); 
                 gameOver = true;
             }
@@ -174,12 +148,35 @@ const Player = (mark) => {
     const computerMove = () => {
         // picks random square on game grid if the the square has already been used the computer picks another one
         let boardPlacement = Math.floor((Math.random() * 9));
-        console.log(boardPlacement);
         if(_isSquareFilled(boardPlacement) === true && gameOver === false){
             computerMove();
         }
 
         _checkMove(gameBoard.gameSquares[boardPlacement]);
+    }
+
+    const extremeMove = () => {
+        let bestScore = Infinity;
+        let bestMove;
+
+        for (let i = 0; i < Array.from(gameBoard.gameSquares).length ; i++){
+            if (!_isSquareFilled(i) && gameOver === false){
+                gameBoard.gameSquares[i].classList.add('nought');
+                gameBoard.board.push('&#79;');
+
+                let value = miniMax(gameBoard.gameSquares, 0, true);
+
+                gameBoard.gameSquares[i].classList.remove('nought');
+                gameBoard.board.pop();
+
+                if (value < bestScore){
+                    bestScore = value;
+                    bestMove = i;
+                }
+            }
+        }
+
+        _checkMove(gameBoard.gameSquares[bestMove]);
     }
 
     const playerVsComputer = () => {
@@ -188,14 +185,14 @@ const Player = (mark) => {
             if (isComputer === true 
                 && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false 
                 && _opponentMode.value === 'easy' || _opponentMode.value === 'medium'){
-                if (mark === 'cross'){
-                    _checkMove(square);
-                    computerMove();
-                }
-                else{
-                    _checkMove(square);
-                    computerMove();
-                }
+                    if (mark === 'cross'){
+                        _checkMove(square);
+                        computerMove();
+                    }
+                    else{
+                        _checkMove(square);
+                        computerMove();
+                    }
                 }    
             })
         })
@@ -206,11 +203,63 @@ const Player = (mark) => {
             square.addEventListener('click', () => {
                 if (isComputer === true && _opponentMode.value === 'extreme'){
                     _checkMove(square);
-                    let computerPlayIndex = minMax(4, 4, true);
-                    _checkMove(gameBoard.gameSquares[computerPlayIndex]);
+                    extremeMove();
                 }
             })
         })
+    }
+
+    let positionEval = {
+        'cross': 1,
+        'nought': -1,
+        'draw': 0,
+    };
+
+    const miniMax = (position, depth, maximizingPlayer)=> {
+        let result;
+        if (gameBoard.winnerCheck('cross') === 'cross') result = 'cross';
+        else if (gameBoard.winnerCheck('nought') === 'nought') result = 'nought';
+        else if (gameBoard.board.length === 9) result = 'draw';
+        else result = undefined;
+
+        if (result !== undefined){
+            return positionEval[result];
+        }
+
+        if (maximizingPlayer){
+            let maxEval = -Infinity;
+            for (let i = 0; i < Array.from(gameBoard.gameSquares).length; i++){
+                if (!_isSquareFilled(i)){
+                    gameBoard.board.push('&#10539;');
+                    gameBoard.gameSquares[i].classList.add('cross');
+
+                    let value = miniMax(gameBoard.gameSquares , depth + 1, false);
+                    maxEval = Math.max(maxEval, value);
+
+                    gameBoard.gameSquares[i].classList.remove('cross');
+                    gameBoard.board.pop();
+                }
+            }
+            return maxEval;
+        }
+
+        else{
+            let minEval = Infinity;
+            for (let i = 0; i < Array.from(gameBoard.gameSquares).length; i++){
+                if (!_isSquareFilled(i)){
+                    gameBoard.board.push('&#79;');
+                    gameBoard.gameSquares[i].classList.add('nought');
+
+                    let value = miniMax(gameBoard.gameSquares, depth + 1, true);
+                    minEval = Math.min(minEval, value);
+
+                    gameBoard.gameSquares[i].classList.remove('nought');
+                    gameBoard.board.pop();
+                }
+            }
+            return minEval;
+        }
+        
     }
 
     return{
