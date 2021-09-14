@@ -147,7 +147,8 @@ const Player = (mark) => {
 
     const computerMove = () => {
         // picks random square on game grid if the the square has already been used the computer picks another one
-        let boardPlacement = Math.floor((Math.random() * 9));
+        let boardPlacement; 
+        _opponentMode.value === 'extreme' ? boardPlacement = 0 : boardPlacement = Math.floor((Math.random() * 9));
         if(_isSquareFilled(boardPlacement) === true && gameOver === false){
             computerMove();
         }
@@ -198,12 +199,37 @@ const Player = (mark) => {
         })
     }
 
+    const _extremeFirstMove = () => {
+        //If statements handle the computer's first move so there is less work to do in the minimax algorithm
+        if (_isSquareFilled(0) || _isSquareFilled(2) || _isSquareFilled(6) || _isSquareFilled(8))
+            _checkMove(gameBoard.gameSquares[4]);
+
+            else if ( _isSquareFilled(5) || _isSquareFilled(7)) _checkMove(gameBoard.gameSquares[8]);
+
+            else if (_isSquareFilled(1)) _checkMove(gameBoard.gameSquares[2]);
+
+            else if (_isSquareFilled(3)) _checkMove(gameBoard.gameSquares[6]);
+
+            else if (_isSquareFilled(4)) _checkMove(gameBoard.gameSquares[0]);
+
+    }
+
     const playerVsExtreme = () => {
         gameBoard.gameSquares.forEach(square => {
             square.addEventListener('click', () => {
-                if (isComputer === true && _opponentMode.value === 'extreme'){
-                    _checkMove(square);
-                    extremeMove();
+                if (isComputer === true && _opponentMode.value === 'extreme' 
+                && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false){
+                   if (mark === 'cross'){
+                        _checkMove(square);
+                        if (gameBoard.board.length === 1) _extremeFirstMove();
+                        else if (gameBoard.board.length < 9) extremeMove();
+                   }
+
+                   else{
+                       if (gameBoard.board.length === 0) _checkMove(gameBoard.gameSquares[0]);
+                       else extremeMove();
+                       _checkMove(square);
+                   }
                 }
             })
         })
@@ -238,6 +264,7 @@ const Player = (mark) => {
 
                     gameBoard.gameSquares[i].classList.remove('cross');
                     gameBoard.board.pop();
+
                 }
             }
             return maxEval;
@@ -255,6 +282,8 @@ const Player = (mark) => {
 
                     gameBoard.gameSquares[i].classList.remove('nought');
                     gameBoard.board.pop();
+
+
                 }
             }
             return minEval;
@@ -305,9 +334,9 @@ const displayController = (() => {
                     player.changeMark();
                     opponent.changeMark();
                     resetGame(player);
-                    if (player.getMark() === 'nought' 
-                    && document.querySelector('select').value !== 'friend') 
-                    player.computerMove();
+                    if (player.getMark() === 'nought' && document.querySelector('select').value !== 'friend') {
+                        player.computerMove();
+                    }
 
                 }
             })
