@@ -12,7 +12,7 @@ const gameBoard = (function() {
 
     // These functions check if there are three noughts or crosses in a row.
     const _vertWinnerCheck = (mark) => {
-        for (let i = 0; i < 3; i ++){
+        for (let i = 0; i < 3; i++){
             if (Array.from(gameSquares[i].classList).includes(mark) 
             && Array.from(gameSquares[i + 3].classList).includes(mark) 
             && Array.from(gameSquares[i + 6].classList).includes(mark)){
@@ -55,11 +55,90 @@ const gameBoard = (function() {
         else if (board.length === 9) return 'draw';
     }
 
+    /*
+    These functions determine when the player is one move away from winning and returns the square
+    that the computer will go to stop them from winning
+    */
+    const vertWinChance = (mark) => {
+        let count = 0;
+        let emptySquare;
+        for (let i = 0; i < 3; i++){
+            if (Array.from(gameSquares[i].classList).includes(mark)) count++;
+            else emptySquare = gameSquares[i];
+
+            if (Array.from(gameSquares[i + 3].classList).includes(mark)) count++;
+            else emptySquare = gameSquares[i + 3];
+
+            if (Array.from(gameSquares[i + 6].classList).includes(mark)) count++;
+            else emptySquare = gameSquares[i + 6];
+
+            if (count === 2) return emptySquare;
+            count = 0;
+        }
+
+        return false;
+    }
+
+    const horWinChance = (mark) => {
+        let count = 0;
+        let emptySquare;
+        for (let i = 0; i < 9; i += 3){
+            if (Array.from(gameSquares[i].classList).includes(mark)) count++;
+            else emptySquare = gameSquares[i];
+
+            if (Array.from(gameSquares[i + 1].classList).includes(mark)) count++;
+            else emptySquare = gameSquares[i + 1];
+
+            if (Array.from(gameSquares[i + 2].classList).includes(mark)) count++;
+            else emptySquare = gameSquares[i + 2];
+
+            if (count === 2) return emptySquare;
+            count = 0;
+        }
+
+        return false;
+    }
+
+    const diagWinChance = (mark) => {
+        let count = 0;
+        let emptySquare;
+
+        // Check diagonal from left to right
+        if (Array.from(gameSquares[0].classList).includes(mark)) count++;
+        else emptySquare = gameSquares[0];
+
+        if (Array.from(gameSquares[4].classList).includes(mark)) count++;
+        else emptySquare = gameSquares[4];
+
+        if (Array.from(gameSquares[8].classList).includes(mark)) count++;
+        else emptySquare = gameSquares[8]
+        
+        if (count === 2) return emptySquare;
+        count = 0;
+
+        // Check diagonal from right to left
+        if (Array.from(gameSquares[2].classList).includes(mark)) count++;
+        else emptySquare = gameSquares[2];
+
+        if (Array.from(gameSquares[4].classList).includes(mark)) count++;
+        else emptySquare = gameSquares[4];
+
+        if (Array.from(gameSquares[6].classList).includes(mark)) count++;
+        else emptySquare = gameSquares[6];
+
+        if (count === 2) return emptySquare;
+        
+        return false;
+    }
+
     return {
         render,
         board,
         gameSquares,
         winnerCheck,
+        vertWinChance,
+        horWinChance,
+        diagWinChance,
     };
 })();
 
@@ -125,13 +204,13 @@ const Player = (mark) => {
                 displayController.winnerDeclaration('Cross');
                 gameOver = true;
             }
-            if (gameBoard.winnerCheck('nought') === 'nought') {
+            else if (gameBoard.winnerCheck('nought') === 'nought') {
                 displayController.winnerDeclaration('Nought');
                 gameOver = true;
             }
         }
 
-            if (gameBoard.winnerCheck(mark) === 'draw') {
+            else if (gameBoard.winnerCheck(mark) === 'draw') {
                 displayController.drawDeclaration(); 
                 gameOver = true;
             }
@@ -162,7 +241,7 @@ const Player = (mark) => {
             if (isComputer === true 
                 && gameOver === false
                 && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false 
-                && _opponentMode.value === 'easy' || _opponentMode.value === 'medium'){
+                && _opponentMode.value === 'easy'){
 
                     if (mark === 'cross'){
                         _checkMove(square);
@@ -177,7 +256,53 @@ const Player = (mark) => {
         })
     }
 
-    const _extremeMoveO = () => {
+    // General function for the medium computer to block player moves.
+    const _computerBlock = (winChance) => {
+        if (winChance(mark) !== false){
+            let square = winChance(mark);
+            if (mark === 'cross' && !Array.from(square.classList).includes('nought')) _checkMove(square);
+            else if (mark === 'nought' && !Array.from(square.classList).includes('cross')) _checkMove(square);
+            // If the space is take the computer will pick a random square.
+            else computerMove();
+            return true;
+        }
+        return false;
+
+    }
+
+    const _mediumComputerMove = () => {
+        if (_computerBlock(gameBoard.vertWinChance));
+
+        else if (_computerBlock(gameBoard.horWinChance));
+        
+        else if (_computerBlock(gameBoard.diagWinChance));
+
+        else{
+            computerMove();
+        }
+    }
+
+    const playerVsMedium = () => {
+        gameBoard.gameSquares.forEach(square => {
+            square.addEventListener('click', () => {
+                if (isComputer === true && gameOver === false 
+                && _isSquareFilled(Array.from(gameBoard.gameSquares).indexOf(square)) === false
+                && _opponentMode.value === 'medium'){
+                    if (mark === 'cross'){
+                        _checkMove(square);
+                        _mediumComputerMove();   
+                    } 
+                    else{
+                        _checkMove(square);
+                        _mediumComputerMove();   
+                    }
+                }
+            })
+        })
+    }
+    
+
+    const _extremeMoveX = () => {
         let bestScore = -Infinity;
         let bestMove;
 
@@ -201,7 +326,7 @@ const Player = (mark) => {
         _checkMove(gameBoard.gameSquares[bestMove]);
     }
 
-    const _extremeMoveX = () => {
+    const _extremeMoveO = () => {
         let bestScore = Infinity;
         let bestMove;
 
@@ -226,7 +351,7 @@ const Player = (mark) => {
     }
     
     //If statements handle the computer's first move so there is less work to do in the miniMax algorithm
-    const _extremeFirstMoveX = () => {
+    const _extremeFirstMoveO = () => {
         if (_isSquareFilled(0) || _isSquareFilled(2) || _isSquareFilled(6) || _isSquareFilled(8))
             _checkMove(gameBoard.gameSquares[4]);
 
@@ -239,7 +364,7 @@ const Player = (mark) => {
         else if (_isSquareFilled(4)) _checkMove(gameBoard.gameSquares[0]);
     }
 
-    const _extremeFirstMoveO = () => {
+    const _extremeFirstMoveX = () => {
         if (_isSquareFilled(5) || _isSquareFilled(8) || _isSquareFilled(7)) 
             _checkMove(gameBoard.gameSquares[2]);
 
@@ -258,14 +383,14 @@ const Player = (mark) => {
                 && gameOver === false){
                    if (mark === 'cross'){
                         _checkMove(square);
-                        if (gameBoard.board.length === 1) _extremeFirstMoveX();
-                        else if (gameBoard.board.length < 9) _extremeMoveX();
+                        if (gameBoard.board.length === 1) _extremeFirstMoveO();
+                        else if (gameBoard.board.length < 9) _extremeMoveO();
                    }
 
                    else{
                         _checkMove(square);
-                        if (gameBoard.board.length === 2) _extremeFirstMoveO();
-                        else if (gameBoard.board.length < 9) _extremeMoveO();
+                        if (gameBoard.board.length === 2) _extremeFirstMoveX();
+                        else if (gameBoard.board.length < 9) _extremeMoveX();
                    }
                 }
             })
@@ -287,7 +412,7 @@ const Player = (mark) => {
         else if (gameBoard.board.length === 9) result = 'draw';
         else result = undefined;
 
-        if (result !== undefined || depth === -1){
+        if (result !== undefined){
             return _positionEval[result];
         }
 
@@ -327,7 +452,6 @@ const Player = (mark) => {
             }
             return minEval;
         }
-        
     }
 
     return{
@@ -340,6 +464,7 @@ const Player = (mark) => {
         computerMove,
         restart,
         playerVsExtreme,
+        playerVsMedium,
     }
 }
 
@@ -418,4 +543,5 @@ displayController.resetListener(player1);
 
 player1.friendMode();
 player1.playerVsEasy();
+player1.playerVsMedium();
 player1.playerVsExtreme();
